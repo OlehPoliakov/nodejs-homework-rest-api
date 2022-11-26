@@ -1,70 +1,63 @@
-const fs = require('fs/promises');
-const path = require('path');
-const ObjectID = require('bson-objectid');
+const { Schema, model } = require('mongoose');
+const Joi = require('joi');
 
-const contactsPath = path.join(__dirname, './contacts.json');
+const { handleSaveErrors } = require('../helpers');
 
-const updateContacts = async contact => {
-  await fs.writeFile(contactsPath, JSON.stringify(contact, null, 2));
+const genders = ['male', 'female'];
+
+const contactSchema = Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Set name for contact'],
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    favorite: {
+      type: Boolean,
+      default: false,
+    },
+    gender: {
+      type: String,
+      enum: genders,
+      required: true,
+    },
+  },
+  { versionKey: false, timestamps: true }
+);
+
+contactSchema.post('save', handleSaveErrors);
+
+const addSchema = Joi.object({
+  name: Joi.string().required(),
+  email: Joi.string().required(),
+  phone: Joi.string().required(),
+  gender: Joi.string()
+    .valid(...genders)
+    .required(),
+  favorite: Joi.boolean(),
+});
+
+const updateFavoriteSchema = Joi.object({
+  favorite: Joi.boolean().required('qweqweqweqwe'),
+});
+
+const schemas = {
+  addSchema,
+  updateFavoriteSchema,
 };
 
-const listContacts = async () => {
-  const data = await fs.readFile(contactsPath);
-  return JSON.parse(data);
-};
-
-const getContactById = async id => {
-  const allContacts = await listContacts();
-  const data = await allContacts.find(contact => contact.id === id);
-  if (!data) {
-    return null;
-  }
-  return data;
-};
-
-const removeContact = async id => {
-  const allContacts = await listContacts();
-  const idx = allContacts.findIndex(item => item.id === id);
-
-  if (idx === -1) {
-    return null;
-  }
-
-  const [result] = allContacts.splice(idx, 1);
-  updateContacts(allContacts);
-  return result;
-};
-
-const addContact = async ({ name, email, phone }) => {
-  const allContacts = await listContacts();
-  const newContact = {
-    id: ObjectID(),
-    name,
-    email,
-    phone,
-  };
-  allContacts.push(newContact);
-  updateContacts(allContacts);
-  return newContact;
-};
-
-const updateContactById = async (id, body) => {
-  const allContacts = await listContacts();
-  const idx = allContacts.findIndex(item => item.id === id);
-
-  if (idx === -1) {
-    return null;
-  }
-
-  allContacts[idx] = { id, ...body };
-  await updateContacts(allContacts);
-  return allContacts[idx];
-};
+const Contact = model('contact', contactSchema);
+// contacts => contact (Монгус розуміє, пишемо іменник в однині обовьязково)
+// Exemple = categories => category
 
 module.exports = {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContactById,
+  Contact,
+  schemas,
 };
