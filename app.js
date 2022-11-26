@@ -1,14 +1,7 @@
-// B3cSnSGRMzMGqHbz;
-const mongoose = require('mongoose');
 const express = require('express');
 const logger = require('morgan');
 const cors = require('cors');
-const { DB_HOST } = process.env;
-
-mongoose
-  .connect(DB_HOST)
-  .then(() => console.log('Database connect'))
-  .catch(error => console.log(error.message));
+require('dotenv').config();
 
 const contactsRouter = require('./routes/api/contacts');
 
@@ -17,7 +10,6 @@ const app = express();
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short';
 
 app.use(logger(formatsLogger));
-// Обхід в браузері CORS політики для обміну інформація між доменами (бібліотека "cors")
 app.use(cors());
 app.use(express.json());
 
