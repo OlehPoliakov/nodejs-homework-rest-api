@@ -13,11 +13,9 @@ const contactSchema = Schema(
     },
     email: {
       type: String,
-      required: true,
     },
     phone: {
       type: String,
-      required: true,
     },
     favorite: {
       type: Boolean,
@@ -26,7 +24,6 @@ const contactSchema = Schema(
     gender: {
       type: String,
       enum: genders,
-      required: true,
     },
   },
   { versionKey: false, timestamps: true }
