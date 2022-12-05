@@ -3,7 +3,7 @@ const Joi = require('joi');
 
 const { handleSaveErrors } = require('../helpers');
 
-const genders = ['male', 'female'];
+const genders = ['male', 'female', ''];
 
 const contactSchema = Schema(
   {
@@ -13,9 +13,11 @@ const contactSchema = Schema(
     },
     email: {
       type: String,
+      required: [true, 'Set Email for contact'],
     },
     phone: {
       type: String,
+      required: [true, 'Set Phone for contact'],
     },
     favorite: {
       type: Boolean,
@@ -24,6 +26,12 @@ const contactSchema = Schema(
     gender: {
       type: String,
       enum: genders,
+      default: '',
+    },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+      required: true,
     },
   },
   { versionKey: false, timestamps: true }
@@ -35,9 +43,7 @@ const addSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().required(),
   phone: Joi.string().required(),
-  gender: Joi.string()
-    .valid(...genders)
-    .required(),
+  gender: Joi.string().valid(...genders),
   favorite: Joi.boolean(),
 });
 
@@ -51,8 +57,6 @@ const schemas = {
 };
 
 const Contact = model('contact', contactSchema);
-// contacts => contact (Монгус розуміє, пишемо іменник в однині обовьязково)
-// Exemple = categories => category
 
 module.exports = {
   Contact,
