@@ -11,4 +11,4 @@ const sendEmail = async(data) => {
   return true;
 }
 
-module.export = sendEmail;
+module.exports = sendEmail;
