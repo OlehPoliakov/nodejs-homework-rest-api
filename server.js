@@ -20,6 +20,8 @@ const createFolderIsNotExist = async folder => {
   }
 };
 
+// mongoose.set("strictQuery", true)
+
 mongoose
   .connect(DB_HOST)
   .then(() => {
